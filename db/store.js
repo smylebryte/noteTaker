@@ -12,14 +12,28 @@ class Store {
 
     getNotes() {
         return this.read().then((notes) => {
-            return JSON.parse(notes)
+            console.log(notes)
+            let readNotes;
+
+            try {
+                readNotes = [].concat(JSON.parse(notes))
+            } catch (err) {
+                readNotes = []
+            }
+            return readNotes
         });
     }
 
+    write(notes) {
+        writeFileAsync('db/db.json', JSON.stringify(notes))
+    }
     writeNotes(note) {
         const { title, text } = note
         const newNote = { title, text, id: uuidv4() }
-        return this.getNotes().then((notes) => [...notes, newNote]).then((updated) => writeFileAsync('db/db.json', JSON.stringify(updated))).then(() => newNote)
+        return this.getNotes()
+            .then((notes) => [...notes, newNote])
+            .then((updated) => this.write(updated))
+            .then(() => newNote)
     }
 
     deleteNotes(id) {
